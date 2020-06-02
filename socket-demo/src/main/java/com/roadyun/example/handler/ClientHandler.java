@@ -1,9 +1,6 @@
 package com.roadyun.example.handler;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.Socket;
 
 /**
@@ -23,17 +20,24 @@ public class ClientHandler extends Thread {
         this.socket = socket;
     }
 
+    InputStream inputStream = null;
+    InputStreamReader inputStreamReader = null;
+    BufferedReader bufferedReader = null;
+    PrintWriter printWriter = null;
+    OutputStream outputStream = null;
+
     @Override
     public void run() {
         super.run();
         System.out.println("新客户端连接：" + socket.getInetAddress().getHostAddress() + " 端口:" + socket.getPort());
-        PrintStream socketOutput = null;
-        BufferedReader socketInput = null;
         try {
             // 获取输入流，用于接收数据
-            socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream(),"utf-8"));
+            inputStream = socket.getInputStream();
+            inputStreamReader = new InputStreamReader(inputStream, "utf-8");
+            bufferedReader = new BufferedReader(inputStreamReader);
             // 获取打印流，用于数据输出；服务器返回数据使用
-            socketOutput = new PrintStream(socket.getOutputStream());
+            outputStream = socket.getOutputStream();
+            printWriter = new PrintWriter(outputStream);
 
             // http请求体
             StringBuilder headStr = new StringBuilder();
@@ -41,9 +45,14 @@ public class ClientHandler extends Thread {
             StringBuilder pramsStr = new StringBuilder();
 
             // 获取请求体与POST请求的JSON参数
-            this.getHttpRequest(socketInput,headStr,pramsStr,lineProperty);
+            this.getHttpRequest(bufferedReader,headStr,pramsStr,lineProperty);
 
-            this.send(socketOutput);
+            // 关闭输入流
+            socket.shutdownInput();
+
+            // 响应
+            this.response(printWriter,headStr.toString());
+
             // 打印请求体和POST参数
             this.print(headStr,pramsStr);
 
@@ -51,42 +60,46 @@ public class ClientHandler extends Thread {
             e.printStackTrace();
         } finally {
             // 连接关闭
-            this.close(socketInput,socketOutput);
+            this.close();
         }
         System.out.println("客户端已退出：" + socket.getInetAddress().getHostAddress() + " 端口:" + socket.getPort());
     }
 
-    private void send(PrintStream socketOutput) {
-        StringBuilder header = new StringBuilder();
-        header.append("HTTP/1.1 404 NOT FOUND ");
-        header.append(lineProperty);
-        header.append("Content-Type: text/html;charset=utf-8");
-        header.append(lineProperty);
-        header.append(lineProperty);
-        System.out.println("-----------响应头---------");
-        System.out.println(header.toString());
-        socketOutput.println(header.toString());
-        String body = "<h1>NOT FOUND</h1>";
-        socketOutput.println(body);
+    /**
+     * 响应
+     * @param printWriter
+     * @param content
+     */
+    private void response(PrintWriter printWriter,String content) {
+        printWriter.println("HTTP/1.1 200 OK");
+        printWriter.println("Content-Type: text/html;charset=utf-8 ");
+        printWriter.println();
+        printWriter.println("<html><body><b>");
+        printWriter.println(content);
+        printWriter.println("</b></body></html>");
+        printWriter.flush();
     }
 
     /**
      * 获取请求体与POST请求的JSON参数
-     * @param socketInput
+     * @param bufferedReader
      * @param headStr 请求体
      * @param pramsStr 请求参数
      * @param lineProperty 换行符
      * @throws IOException
      */
-    private void getHttpRequest(BufferedReader socketInput, StringBuilder headStr, StringBuilder pramsStr, String lineProperty) throws IOException {
+    private void getHttpRequest(BufferedReader bufferedReader, StringBuilder headStr, StringBuilder pramsStr, String lineProperty) throws IOException {
         while (true){
-            String line = socketInput.readLine();
+            String line = bufferedReader.readLine();
+            if (line == null){
+                break;
+            }
             //"".equals(line)表示http头信息读取完成，判断是否包含参数
             if ("".equals(line)) {
                 //添加换行符
                 headStr.append(lineProperty);
                 //读取post请求json参数
-                while ((line = socketInput.readLine()) != null) {
+                while ((line = bufferedReader.readLine()) != null) {
                     headStr.append(line);
                     headStr.append(lineProperty);
                     pramsStr.append(line);
@@ -119,16 +132,23 @@ public class ClientHandler extends Thread {
 
     /**
      * 连接关闭
-     * @param socketInput
-     * @param socketOutput
      */
-    private void close(BufferedReader socketInput, PrintStream socketOutput) {
+    private void close() {
         try {
-            if (socketInput != null) {
-                socketInput.close();
+            if (printWriter != null) {
+                inputStream.close();
             }
-            if (socketOutput != null) {
-                socketOutput.close();
+            if (printWriter != null) {
+                inputStreamReader.close();
+            }
+            if (printWriter != null) {
+                outputStream.close();
+            }
+            if (printWriter != null) {
+                bufferedReader.close();
+            }
+            if (printWriter != null) {
+                printWriter.close();
             }
             socket.close();
         } catch (IOException e) {
