@@ -14,7 +14,20 @@ public class Constant {
     /**
      * ?分隔符
      */
-    public static String Question_Separator = "?";
+    public static String Question_Separator = "\\?";
+    /**
+     * 空格
+     */
+    public static String SPACE = "";
+    /**
+     * 冒号
+     */
+    public static String COLON = ":";
+
+    public static int ZERO = 0;
+    public static int ONE = 1;
+    public static int TWO = 2;
+
     /**
      * 换行分割符
      */

@@ -4,6 +4,7 @@ import com.roadyun.example.common.Constant;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Map;
 
 /**
  * @ClassName: Acceptor
@@ -37,25 +38,27 @@ public class SocketProcessor extends Thread {
             outputStream = socket.getOutputStream();
             printWriter = new PrintWriter(outputStream);
 
-            HttpRequestProcessor httpRequestProcessor = new HttpRequestProcessor(bufferedReader);
+            HttpRequestProcessor httpRequestProcessor = new HttpRequestProcessor(inputStream);
+            Map<String, String> httpRequest = httpRequestProcessor.getHttpRequest();
+//            System.out.println("httpRequest: ");
+//            System.out.println(httpRequest.toString());
 
-
-            // http请求体
-            StringBuilder headStr = new StringBuilder();
-            // POST参数
-            StringBuilder pramsStr = new StringBuilder();
-
-            // 获取请求体与POST请求的JSON参数
-            this.getHttpRequest(headStr,pramsStr);
+//            // http请求体
+//            StringBuilder headStr = new StringBuilder();
+//            // POST参数
+//            StringBuilder pramsStr = new StringBuilder();
+//
+//            // 获取请求体与POST请求的JSON参数
+//            this.getHttpRequest(headStr,pramsStr);
 
             // 关闭输入流
             socket.shutdownInput();
 
             // 响应
-            this.response(printWriter,headStr.toString());
+            this.response(printWriter,httpRequest.toString());
 
             // 打印请求体和POST参数
-            this.print(headStr,pramsStr);
+//            this.print(headStr,pramsStr);
 
         } catch (Exception e) {
             e.printStackTrace();
