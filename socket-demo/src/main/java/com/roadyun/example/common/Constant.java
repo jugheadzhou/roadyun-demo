@@ -12,9 +12,14 @@ public class Constant {
      */
     public static String Blank_Separator = "\\s";
     /**
-     * ?分隔符
+     * 问好分隔符
      */
     public static String Question_Separator = "\\?";
+    /**
+     * 空一行
+     */
+    public static String ONE_SPACE_LINE = "\r\n\r\n";
+
     /**
      * 空格
      */

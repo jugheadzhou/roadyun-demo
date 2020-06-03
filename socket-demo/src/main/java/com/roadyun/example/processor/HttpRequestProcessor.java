@@ -49,59 +49,83 @@ public class HttpRequestProcessor {
         httpRequestStr = new String(httpRequestBytes, 0, read);
         System.out.println("---------------HTTP请求体------------");
         System.out.println(httpRequestStr);
-        // 将请求体按空白分隔符分成数组
-        String[] headArray = httpRequestStr.split(Constant.Line_Separator);
-        // 处理第一行
+        // 解析HTTP请求体
+        this.parseHeaders(httpRequestStr);
+    }
+
+
+
+    /**
+     * 解析HTTP请求头信息
+     * <p>
+     *
+     * @param httpRequestStr
+     */
+    public void parseHeaders(String httpRequestStr) {
+        // 1. 第一个空行之前的内容是HTTP请求头信息，之后的是HTTP请求参数
+        int firstSpaceIndex = httpRequestStr.indexOf(Constant.ONE_SPACE_LINE);
+        String postParam = null;
+
+        // 2. 将HTTP请求头信息按空白分隔符分成数组
+        String headStr = httpRequestStr;
+        if (firstSpaceIndex > 0){
+            headStr = httpRequestStr.substring(0,firstSpaceIndex);
+            postParam = httpRequestStr.substring(firstSpaceIndex+4);
+        }
+        String[] headArray = headStr.split(Constant.Line_Separator);
+
+        // 3. 解析第一行
         String firstLine = headArray[0];
         if (StringUtils.isNotEmpty(firstLine)) {
             System.out.println("firstLine: " + firstLine);
             if (firstLine.contains("/favicon.ico")) {
                 return;
             }
-            // 解析请求体
-            this.parseHeaders(headArray);
         }
-    }
-
-    /**
-     * 解析请求体
-     * <p>
-     * TODO 可按照Content-type 判断解析什么类型的参数
-     *
-     * @param headArray
-     */
-    public void parseHeaders(String[] headArray) {
-        int headLength = headArray.length;
-
-        // 1. 解析第一行
-        String firstLine = headArray[0];
         String[] firstLineArray = firstLine.split(Constant.Blank_Separator);
         httpRequest.put(Constant.Method, firstLineArray[0]);
         String url = firstLineArray[1];
         httpRequest.put(Constant.URL, url);
 
-        // 2. 解析url参数
-        if (url.contains(Constant.Question_Separator)) {
-            String[] split = url.split(Constant.Question_Separator);
-            httpRequest.put(Constant.Parameter, split[1]);
-        }
-
-        // 3. 解析body参数（最后两行）
-        String lastLine = headArray[headLength - 1];
-        // 3.1 如果最后一行是空白符
-        if (Constant.SPACE.equals(lastLine)) {
-            headLength = headLength - 1;
-            // 3.2 如果最后一行是不为空，且倒数第二行是空白符，表示最后一行是参数
-        } else if (Constant.SPACE.equals(headArray[headLength - 2]) && StringUtils.isNotEmpty(lastLine)) {
-            httpRequest.put(Constant.Parameter, lastLine);
-            headLength = headLength - 2;
-        }
-
         // 4. 读取请求头字段
+        int headLength = headArray.length;
         for (int i = 1; i < headLength; i++) {
             String line = headArray[i];
             httpRequest.put(line.substring(Constant.ZERO, line.indexOf(Constant.COLON)),
                     line.substring(line.indexOf(Constant.COLON) + Constant.TWO));
         }
+
+        // 5. 解析url参数(只考虑使用?拼接的参数)
+        if (url.contains(Constant.Question_Separator)) {
+            String[] split = url.split(Constant.Question_Separator);
+            httpRequest.put(Constant.Parameter, split[1]);
+        }
+
+        // 6. 解析body参数（第一个空行之后内容）
+        if (StringUtils.isNotEmpty(postParam)){
+            httpRequest.put(Constant.Parameter, postParam);
+        }
+    }
+
+    /**
+     * 解析HTTP请求参数
+     * <p>
+     *
+     */
+    private void parseParams() {
+        String parameter = httpRequest.get(Constant.Parameter);
+        // get请求参数
+        if (Constant.GET.equals(httpRequest.get(Constant.Method))){
+
+            // post请求参数
+            // 1. 根据Content-Type判断读取什么类型的参数，
+            // 2. 如果是文件流，根据Content-Length读取
+        }else if (Constant.POST.equals(httpRequest.get(Constant.Method))){
+
+        }
+    }
+
+    public static void main(String[] args) {
+        System.out.println(Constant.Line_Separator);
     }
 }
