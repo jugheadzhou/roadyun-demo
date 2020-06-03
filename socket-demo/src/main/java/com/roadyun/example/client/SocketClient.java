@@ -1,4 +1,4 @@
-package com.roadyun.example.http;
+package com.roadyun.example.client;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.net.Socket;
  * @Date:Create：in 2020/5/26 0026 10:49
  * @Modified By：
  */
-public class HttpClient {
+public class SocketClient {
     Socket socket = null;
 
     public void createSocket() {
@@ -57,7 +57,7 @@ public class HttpClient {
     }
 
     public static void main(String[] args) {
-        HttpClient client = new HttpClient();
+        SocketClient client = new SocketClient();
         client.createSocket();
         client.communcate();
     }

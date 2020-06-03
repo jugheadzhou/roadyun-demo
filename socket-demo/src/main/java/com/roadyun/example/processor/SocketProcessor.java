@@ -1,22 +1,20 @@
-package com.roadyun.example.handler;
+package com.roadyun.example.processor;
+
+import com.roadyun.example.common.Constant;
 
 import java.io.*;
 import java.net.Socket;
 
 /**
- * @ClassName: ClientHandler
- * @Description:
+ * @ClassName: Acceptor
+ * @Description: 解析请求体
  * @Author 2181250231@qq.com
  * @Create 2020/6/122:44
  */
-public class ClientHandler extends Thread {
-    /**
-     * 换行符
-     */
-    private static String lineProperty = System.getProperty("line.separator");
+public class SocketProcessor extends Thread {
     private Socket socket;
 
-    public ClientHandler(Socket socket) {
+    public SocketProcessor(Socket socket) {
         this.socket = socket;
     }
 
@@ -39,13 +37,16 @@ public class ClientHandler extends Thread {
             outputStream = socket.getOutputStream();
             printWriter = new PrintWriter(outputStream);
 
+            HttpRequestProcessor httpRequestProcessor = new HttpRequestProcessor(bufferedReader);
+
+
             // http请求体
             StringBuilder headStr = new StringBuilder();
             // POST参数
             StringBuilder pramsStr = new StringBuilder();
 
             // 获取请求体与POST请求的JSON参数
-            this.getHttpRequest(bufferedReader,headStr,pramsStr,lineProperty);
+            this.getHttpRequest(headStr,pramsStr);
 
             // 关闭输入流
             socket.shutdownInput();
@@ -82,13 +83,11 @@ public class ClientHandler extends Thread {
 
     /**
      * 获取请求体与POST请求的JSON参数
-     * @param bufferedReader
      * @param headStr 请求体
      * @param pramsStr 请求参数
-     * @param lineProperty 换行符
      * @throws IOException
      */
-    private void getHttpRequest(BufferedReader bufferedReader, StringBuilder headStr, StringBuilder pramsStr, String lineProperty) throws IOException {
+    private void getHttpRequest(StringBuilder headStr, StringBuilder pramsStr) throws IOException {
         while (true){
             String line = bufferedReader.readLine();
             if (line == null){
@@ -97,19 +96,19 @@ public class ClientHandler extends Thread {
             //"".equals(line)表示http头信息读取完成，判断是否包含参数
             if ("".equals(line)) {
                 //添加换行符
-                headStr.append(lineProperty);
+                headStr.append(Constant.Line_Separator);
                 //读取post请求json参数
                 while ((line = bufferedReader.readLine()) != null) {
                     headStr.append(line);
-                    headStr.append(lineProperty);
+                    headStr.append(Constant.Line_Separator);
                     pramsStr.append(line);
-                    pramsStr.append(lineProperty);
+                    pramsStr.append(Constant.Line_Separator);
                 }
                 break;
             } else {
                 //读取请求体头
                 headStr.append(line);
-                headStr.append(lineProperty);
+                headStr.append(Constant.Line_Separator);
             }
         }
     }
