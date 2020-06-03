@@ -36,17 +36,17 @@ public class Constant {
     /**
      * 请求方法
      */
-    public static String Method = "method";
+    public static String Method = "Method";
 
     /**
      * 请求url
      */
-    public static String URL = "url";
+    public static String URL = "URL";
 
     /**
      * 参数
      */
-    public static String Parameter = "parameter";
+    public static String Parameter = "Parameter";
 
     /**
      * 参数

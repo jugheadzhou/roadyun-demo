@@ -38,27 +38,13 @@ public class SocketProcessor extends Thread {
             outputStream = socket.getOutputStream();
             printWriter = new PrintWriter(outputStream);
 
-            HttpRequestProcessor httpRequestProcessor = new HttpRequestProcessor(inputStream);
-            Map<String, String> httpRequest = httpRequestProcessor.getHttpRequest();
-//            System.out.println("httpRequest: ");
-//            System.out.println(httpRequest.toString());
+            // 封装请求体对象
+            HttpRequestProcessor request = new HttpRequestProcessor(inputStream);
+            // 封装响应体对象
+            HttpResponseProcessor response = new HttpResponseProcessor(printWriter);
 
-//            // http请求体
-//            StringBuilder headStr = new StringBuilder();
-//            // POST参数
-//            StringBuilder pramsStr = new StringBuilder();
-//
-//            // 获取请求体与POST请求的JSON参数
-//            this.getHttpRequest(headStr,pramsStr);
-
-            // 关闭输入流
-            socket.shutdownInput();
-
-            // 响应
-            this.response(printWriter,httpRequest.toString());
-
-            // 打印请求体和POST参数
-//            this.print(headStr,pramsStr);
+            // 模拟请求分发
+            dispatch(request, response);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,67 +56,15 @@ public class SocketProcessor extends Thread {
     }
 
     /**
-     * 响应
-     * @param printWriter
-     * @param content
+     * 模拟请求分发
+     * @param request
+     * @param response
      */
-    private void response(PrintWriter printWriter,String content) {
-        printWriter.println("HTTP/1.1 200 OK");
-        printWriter.println("Content-Type: text/html;charset=utf-8 ");
-        printWriter.println();
-        printWriter.println("<html><body><b>");
-        printWriter.println(content);
-        printWriter.println("</b></body></html>");
-        printWriter.flush();
+    private void dispatch(HttpRequestProcessor request, HttpResponseProcessor response) {
+        // 测试 将请求体内容返给浏览器
+        response.write(request.getHttpRequest().toString());
     }
 
-    /**
-     * 获取请求体与POST请求的JSON参数
-     * @param headStr 请求体
-     * @param pramsStr 请求参数
-     * @throws IOException
-     */
-    private void getHttpRequest(StringBuilder headStr, StringBuilder pramsStr) throws IOException {
-        while (true){
-            String line = bufferedReader.readLine();
-            if (line == null){
-                break;
-            }
-            //"".equals(line)表示http头信息读取完成，判断是否包含参数
-            if ("".equals(line)) {
-                //添加换行符
-                headStr.append(Constant.Line_Separator);
-                //读取post请求json参数
-                while ((line = bufferedReader.readLine()) != null) {
-                    headStr.append(line);
-                    headStr.append(Constant.Line_Separator);
-                    pramsStr.append(line);
-                    pramsStr.append(Constant.Line_Separator);
-                }
-                break;
-            } else {
-                //读取请求体头
-                headStr.append(line);
-                headStr.append(Constant.Line_Separator);
-            }
-        }
-    }
-
-    /**
-     * 打印请求体和POST参数
-     * @param headStr
-     * @param pramsStr
-     */
-    private void print(StringBuilder headStr, StringBuilder pramsStr) {
-        if (headStr.length() > 0) {
-            System.out.println("-----------HTTP请求体---------------");
-            System.out.println(headStr.toString());
-        }
-        if (pramsStr.length() > 0) {
-            System.out.println("-----------POST请求参数--------------");
-            System.out.println(pramsStr.toString());
-        }
-    }
 
     /**
      * 连接关闭
