@@ -1,10 +1,7 @@
 package com.roadyun.example.processor;
 
-import com.roadyun.example.common.Constant;
-
 import java.io.*;
 import java.net.Socket;
-import java.util.Map;
 
 /**
  * @ClassName: Acceptor
@@ -32,7 +29,7 @@ public class SocketProcessor extends Thread {
         try {
             // 获取输入流，用于接收数据
             inputStream = socket.getInputStream();
-            inputStreamReader = new InputStreamReader(inputStream, "utf-8");
+            inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
             bufferedReader = new BufferedReader(inputStreamReader);
             // 获取打印流，用于数据输出；服务器返回数据使用
             outputStream = socket.getOutputStream();
@@ -57,6 +54,7 @@ public class SocketProcessor extends Thread {
 
     /**
      * 模拟请求分发
+     *
      * @param request
      * @param response
      */
@@ -64,7 +62,6 @@ public class SocketProcessor extends Thread {
         // 测试 将请求体内容返给浏览器
         response.write(request.getHttpRequest().toString());
     }
-
 
     /**
      * 连接关闭

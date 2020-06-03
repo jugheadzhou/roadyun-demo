@@ -22,14 +22,31 @@ public class HttpRequestProcessor {
         return httpRequest;
     }
 
-    public HttpRequestProcessor(InputStream inputStream) throws IOException {
-        // 读取请求体
+    public HttpRequestProcessor(InputStream inputStream) throws IOException, InterruptedException {
+        /**
+         * 读取请求体
+         * 因为网络通讯往往是间断性的，一串字节往往分几批进行发送。
+         * 例如对方发来字节长度100的数据，本地程序调用available()方法有时得到0，有时得到90，有时能得到100，大多数情况下是100。
+         * 这可能是对方还没有响应，也可能是对方已经响应了，但是数据还没有送达本地。也许分3批到达，也许分两批，也许一次性到达。
+         */
+        // 方案一、指定接收大小
+        //        String httpRequestStr = "";
+        //        byte[] httpRequestBytes = new byte[1024];
+        //        int length = 0;
+        //        if ((length = inputStream.read(httpRequestBytes)) > 0) {
+        //            httpRequestStr = new String(httpRequestBytes, 0, length);
+        //        }
+        // 方案二、获取报文传输参数Content-length的长度,针对开发中已经请求体对象的情况
+        // 方案三、延迟0.2秒
+        Thread.sleep(200);
         String httpRequestStr = "";
-        byte[] httpRequestBytes = new byte[1024];
-        int length = 0;
-        if ((length = inputStream.read(httpRequestBytes)) > 0) {
-            httpRequestStr = new String(httpRequestBytes, 0, length);
+        int available = inputStream.available();
+        if (available == 0) {
+            return;
         }
+        byte[] httpRequestBytes = new byte[available];
+        int read = inputStream.read(httpRequestBytes);
+        httpRequestStr = new String(httpRequestBytes, 0, read);
         System.out.println("---------------HTTP请求体------------");
         System.out.println(httpRequestStr);
         // 将请求体按空白分隔符分成数组
