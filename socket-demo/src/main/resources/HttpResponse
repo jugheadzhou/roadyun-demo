@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+Content-Type: text/html
+Header2: ...
+...
+HeaderN: ...
+  (空行)
+<!doctype ...>
+<html>
+<head>...</head>
+<body>
+...
+</body>
+</html>
