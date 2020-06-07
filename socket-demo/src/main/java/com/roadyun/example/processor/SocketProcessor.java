@@ -1,5 +1,7 @@
 package com.roadyun.example.processor;
 
+import com.roadyun.example.common.Constant;
+
 import java.io.*;
 import java.net.Socket;
 
@@ -60,7 +62,19 @@ public class SocketProcessor extends Thread {
      */
     private void dispatch(HttpRequestProcessor request, HttpResponseProcessor response) {
         // 测试 将请求体内容返给浏览器
-        response.write(request.getHttpRequest().toString());
+        if ("/index".equals(request.getHttpRequest().get(Constant.URL))){
+            response.writeFile("static/index.html");
+        }
+        if ("/test".equals(request.getHttpRequest().get(Constant.URL))){
+            response.writeFile("static/test.txt");
+        }
+        if ("/img".equals(request.getHttpRequest().get(Constant.URL))){
+            try {
+                response.upload("static/test.jpg");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**

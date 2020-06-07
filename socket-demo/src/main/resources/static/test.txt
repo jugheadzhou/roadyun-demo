@@ -1,0 +1,1 @@
+HTTP附件上传协议是RFC1876协议，RFC1876协议是在HTTP协议的基础上为INPUT标签增加了file属性，同时限定了Form的method必须为POST，ENCTYPE必须为multipart/form-data。RFC1867协议对HTTP头作了适当地变更，content-type头由以前的：content-type:application/x-www-form-urlencoded变为content-type:multipart/form-data;+空格+boundary=字符串。RFC1867增加了文件上传得功能，而上传文件内容自然也会被加入到HTTP的实体中。现在因为既有HTTP一般的参数实体，又有上传文件的实体，所以用boundary把每种实体进行了分割。
