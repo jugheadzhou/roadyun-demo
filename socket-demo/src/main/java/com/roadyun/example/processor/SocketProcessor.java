@@ -75,6 +75,9 @@ public class SocketProcessor extends Thread {
                 e.printStackTrace();
             }
         }
+        if ("/".equals(request.getHttpRequest().get(Constant.URL))){
+            response.write(request.getHttpRequest().toString());
+        }
     }
 
     /**

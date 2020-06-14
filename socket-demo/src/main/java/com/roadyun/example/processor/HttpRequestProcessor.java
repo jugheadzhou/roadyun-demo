@@ -103,16 +103,16 @@ public class HttpRequestProcessor {
 
         // 6. 解析body参数（第一个空行之后内容）
         if (StringUtils.isNotEmpty(postParam)){
-            httpRequest.put(Constant.Parameter, postParam);
+            parsePostParams(postParam);
         }
     }
 
     /**
-     * 解析HTTP请求参数
+     * 解析HTTP POST请求参数
      * <p>
      *
      */
-    private void parseParams() {
+    private void parsePostParams(String postParam) {
         String parameter = httpRequest.get(Constant.Parameter);
         // get请求参数
         if (Constant.GET.equals(httpRequest.get(Constant.Method))){
