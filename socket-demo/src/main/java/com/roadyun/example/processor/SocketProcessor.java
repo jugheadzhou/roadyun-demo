@@ -1,9 +1,11 @@
 package com.roadyun.example.processor;
 
 import com.roadyun.example.common.Constant;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Optional;
 
 /**
  * @ClassName: Acceptor
@@ -60,23 +62,21 @@ public class SocketProcessor extends Thread {
      * @param request
      * @param response
      */
-    private void dispatch(HttpRequestProcessor request, HttpResponseProcessor response) {
+    private void dispatch(HttpRequestProcessor request, HttpResponseProcessor response) throws Exception{
         // 测试 将请求体内容返给浏览器
-        if ("/index".equals(request.getHttpRequest().get(Constant.URL))){
-            response.writeFile("static/index.html");
+        String url = request.getHttpRequest().get(Constant.URL);
+        if (StringUtils.isEmpty(url)){
+            return;
         }
-        if ("/test".equals(request.getHttpRequest().get(Constant.URL))){
-            response.writeFile("static/test.txt");
-        }
-        if ("/img".equals(request.getHttpRequest().get(Constant.URL))){
-            try {
+        switch (url){
+            case "/index":
+                response.writeFile("static/index.html");
+            case "/test":
+                response.writeFile("static/test.txt");
+            case "/img":
                 response.upload("static/test.jpg");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        if ("/".equals(request.getHttpRequest().get(Constant.URL))){
-            response.write(request.getHttpRequest().toString());
+            case "/":
+                response.write(request.getHttpRequest().toString());
         }
     }
 
